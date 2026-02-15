@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Puzzle Surprise ❤️</title>
+<title>My Heart Puzzle ❤️</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -12,64 +12,49 @@ body {
     color: white;
     font-family: Arial, sans-serif;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
+    flex-direction: column;
 }
 
-h1 { margin-bottom: 10px; }
+h2 {
+    margin-bottom: 15px;
+}
 
 #puzzle {
-    width: 300px;
-    height: 300px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    border: 3px solid white;
+    gap: 2px;
+    width: 300px;
+    height: 300px;
 }
 
 .tile {
-    position: relative;
-    overflow: hidden;
+    background-image: url("puzzle.jpg");
+    background-size: 300px 300px;
     cursor: pointer;
-    border: 1px solid black;
 }
 
-.tile img {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-}
-
-.hidden img {
+#win {
     display: none;
-}
-
-#winMessage {
-    display: none;
-    margin-top: 20px;
+    margin-top: 30px;
     font-size: 24px;
+    color: #ffb6c1;
     text-align: center;
-    animation: glow 1.5s infinite alternate;
-}
-
-@keyframes glow {
-    from { text-shadow: 0 0 10px pink; }
-    to { text-shadow: 0 0 25px white; }
 }
 </style>
 </head>
 
 <body>
 
-<h1>🧩 Complete the Puzzle</h1>
-<p>Tap tiles to complete it 💕</p>
+<h2>🧩 Complete the puzzle</h2>
 
 <div id="puzzle"></div>
 
-<div id="winMessage">
-    🎉 Yayyy 🥹<br>
-    You win my heart ❤️
+<div id="win">
+    🎉 Yayyy 🥰<br>
+    You win my heart 💖
 </div>
 
 <script>
@@ -78,52 +63,51 @@ const size = 3;
 let tiles = [];
 
 function createPuzzle() {
+    tiles = [];
     puzzle.innerHTML = "";
-    tiles = [...Array(size * size).keys()].sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < size * size; i++) {
+        tiles.push(i);
+    }
+
+    tiles.sort(() => Math.random() - 0.5);
 
     tiles.forEach((num, index) => {
         const tile = document.createElement("div");
         tile.className = "tile";
+        tile.style.backgroundPosition =
+            `${-(num % size) * 100}px ${-Math.floor(num / size) * 100}px`;
 
-        const img = document.createElement("img");
-        img.src = "puzzle.jpg";
-
-        const x = (num % size) * -100;
-        const y = Math.floor(num / size) * -100;
-        img.style.left = x + "px";
-        img.style.top = y + "px";
-
-        if (num === size * size - 1) {
-            tile.classList.add("hidden");
-        }
-
-        tile.appendChild(img);
-        tile.addEventListener("click", () => moveTile(index));
+        tile.onclick = () => swap(index);
         puzzle.appendChild(tile);
     });
 }
 
-function moveTile(index) {
-    const emptyIndex = tiles.indexOf(size * size - 1);
-    const validMoves = [
-        emptyIndex - 1,
-        emptyIndex + 1,
-        emptyIndex - size,
-        emptyIndex + size
-    ];
+function swap(index) {
+    const empty = tiles.indexOf(size * size - 1);
+    const valid =
+        Math.abs(empty - index) === 1 ||
+        Math.abs(empty - index) === size;
 
-    if (validMoves.includes(index)) {
-        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
-        createPuzzle();
-        checkWin();
-    }
+    if (!valid) return;
+
+    [tiles[empty], tiles[index]] = [tiles[index], tiles[empty]];
+    updateTiles();
+    checkWin();
+}
+
+function updateTiles() {
+    [...puzzle.children].forEach((tile, i) => {
+        const num = tiles[i];
+        tile.style.backgroundPosition =
+            `${-(num % size) * 100}px ${-Math.floor(num / size) * 100}px`;
+    });
 }
 
 function checkWin() {
-    for (let i = 0; i < tiles.length; i++) {
-        if (tiles[i] !== i) return;
+    if (tiles.every((v, i) => v === i)) {
+        document.getElementById("win").style.display = "block";
     }
-    document.getElementById("winMessage").style.display = "block";
 }
 
 createPuzzle();
