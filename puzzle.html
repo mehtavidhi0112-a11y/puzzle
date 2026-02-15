@@ -16,30 +16,33 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    overflow: hidden;
 }
 
-h1 {
-    margin-bottom: 10px;
-}
+h1 { margin-bottom: 10px; }
 
 #puzzle {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
     width: 300px;
     height: 300px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     border: 3px solid white;
 }
 
 .tile {
-    background-image: url("puzzle.jpg");
-    background-size: 300px 300px;
+    position: relative;
+    overflow: hidden;
     cursor: pointer;
     border: 1px solid black;
 }
 
-.hidden {
-    background: black;
+.tile img {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+}
+
+.hidden img {
+    display: none;
 }
 
 #winMessage {
@@ -60,12 +63,12 @@ h1 {
 <body>
 
 <h1>🧩 Complete the Puzzle</h1>
-<p>Tap tiles to fix the picture 💕</p>
+<p>Tap tiles to complete it 💕</p>
 
 <div id="puzzle"></div>
 
 <div id="winMessage">
-    🎉 Yayyy 🥹 <br>
+    🎉 Yayyy 🥹<br>
     You win my heart ❤️
 </div>
 
@@ -75,29 +78,26 @@ const size = 3;
 let tiles = [];
 
 function createPuzzle() {
-    tiles = [];
     puzzle.innerHTML = "";
-
-    for (let i = 0; i < size * size; i++) {
-        tiles.push(i);
-    }
-
-    tiles.sort(() => Math.random() - 0.5);
+    tiles = [...Array(size * size).keys()].sort(() => Math.random() - 0.5);
 
     tiles.forEach((num, index) => {
         const tile = document.createElement("div");
         tile.className = "tile";
-        tile.dataset.index = index;
-        tile.dataset.value = num;
+
+        const img = document.createElement("img");
+        img.src = "puzzle.jpg";
+
+        const x = (num % size) * -100;
+        const y = Math.floor(num / size) * -100;
+        img.style.left = x + "px";
+        img.style.top = y + "px";
 
         if (num === size * size - 1) {
             tile.classList.add("hidden");
-        } else {
-            const x = (num % size) * -100;
-            const y = Math.floor(num / size) * -100;
-            tile.style.backgroundPosition = `${x}px ${y}px`;
         }
 
+        tile.appendChild(img);
         tile.addEventListener("click", () => moveTile(index));
         puzzle.appendChild(tile);
     });
@@ -105,7 +105,6 @@ function createPuzzle() {
 
 function moveTile(index) {
     const emptyIndex = tiles.indexOf(size * size - 1);
-
     const validMoves = [
         emptyIndex - 1,
         emptyIndex + 1,
