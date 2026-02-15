@@ -1,13 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Puzzle</title>
+<meta charset="UTF-8">
+<title>Puzzle Surprise ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+#puzzle {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 300px;
+    height: 300px;
+    border: 3px solid white;
+}
+
+.tile {
+    background-image: url("puzzle.jpg");
+    background-size: 300px 300px;
+    cursor: pointer;
+    border: 1px solid black;
+}
+
+.hidden {
+    background: black;
+}
+
+#winMessage {
+    display: none;
+    margin-top: 20px;
+    font-size: 24px;
+    text-align: center;
+    animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 10px pink; }
+    to { text-shadow: 0 0 25px white; }
+}
+</style>
 </head>
 
-<body style="background:black; color:white; text-align:center; padding-top:100px;">
+<body>
 
-<h1>🧩 Puzzle Page Loaded</h1>
-<p>If you see this, everything is working ❤️</p>
+<h1>🧩 Complete the Puzzle</h1>
+<p>Tap tiles to fix the picture 💕</p>
+
+<div id="puzzle"></div>
+
+<div id="winMessage">
+    🎉 Yayyy 🥹 <br>
+    You win my heart ❤️
+</div>
+
+<script>
+const puzzle = document.getElementById("puzzle");
+const size = 3;
+let tiles = [];
+
+function createPuzzle() {
+    tiles = [];
+    puzzle.innerHTML = "";
+
+    for (let i = 0; i < size * size; i++) {
+        tiles.push(i);
+    }
+
+    tiles.sort(() => Math.random() - 0.5);
+
+    tiles.forEach((num, index) => {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.dataset.index = index;
+        tile.dataset.value = num;
+
+        if (num === size * size - 1) {
+            tile.classList.add("hidden");
+        } else {
+            const x = (num % size) * -100;
+            const y = Math.floor(num / size) * -100;
+            tile.style.backgroundPosition = `${x}px ${y}px`;
+        }
+
+        tile.addEventListener("click", () => moveTile(index));
+        puzzle.appendChild(tile);
+    });
+}
+
+function moveTile(index) {
+    const emptyIndex = tiles.indexOf(size * size - 1);
+
+    const validMoves = [
+        emptyIndex - 1,
+        emptyIndex + 1,
+        emptyIndex - size,
+        emptyIndex + size
+    ];
+
+    if (validMoves.includes(index)) {
+        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+        createPuzzle();
+        checkWin();
+    }
+}
+
+function checkWin() {
+    for (let i = 0; i < tiles.length; i++) {
+        if (tiles[i] !== i) return;
+    }
+    document.getElementById("winMessage").style.display = "block";
+}
+
+createPuzzle();
+</script>
 
 </body>
 </html>
